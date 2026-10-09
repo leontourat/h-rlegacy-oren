@@ -64,7 +64,16 @@ function layout(){
  const current=(location.pathname.split('/').pop()||'index.html');
  const links=[['index.html','Accueil'],['catalogue.html','Catalogue'],['actualites.html','Actualités'],['admin.html','Administration']];
  const menu=links.map(([href,label])=>`<a href="${href}" class="${current===href?'is-active':''} ${href==='admin.html'?'nav-admin':''}" ${current===href?'aria-current="page"':''}>${label}</a>`).join('');
- $("#header").innerHTML=`<header class="site-header"><div class="container nav"><a class="brand" href="index.html">H&R <span>LEGACY</span></a><nav class="nav-links" aria-label="Navigation principale">${menu}</nav></div></header>`;
+ $("#header").innerHTML=`<header class="site-header"><div class="container nav"><a class="brand" href="index.html">H&R <span>LEGACY</span></a><button type="button" class="mobile-menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="site-navigation"><span></span><span></span><span></span></button><nav id="site-navigation" class="nav-links" aria-label="Navigation principale">${menu}</nav></div></header>`;
+ const menuButton=document.querySelector('.mobile-menu-toggle');
+ const navigation=document.getElementById('site-navigation');
+ if(menuButton && navigation){
+   const closeMenu=()=>{menuButton.setAttribute('aria-expanded','false');menuButton.setAttribute('aria-label','Ouvrir le menu');navigation.classList.remove('mobile-open');};
+   menuButton.addEventListener('click',()=>{const opened=menuButton.getAttribute('aria-expanded')==='true';menuButton.setAttribute('aria-expanded',String(!opened));menuButton.setAttribute('aria-label',opened?'Ouvrir le menu':'Fermer le menu');navigation.classList.toggle('mobile-open',!opened);});
+   navigation.addEventListener('click',e=>{if(e.target.closest('a'))closeMenu();});
+   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();});
+   document.addEventListener('click',e=>{if(!e.target.closest('.site-header'))closeMenu();});
+ }
 
 
  const target=$("#footer");

@@ -347,3 +347,62 @@ html,body,main{background:#111820!important;color:var(--ink)}
 .site-popup-stack{position:fixed;bottom:22px;left:22px;display:flex;flex-direction:column;gap:12px;z-index:2000;max-height:calc(100dvh - 44px);overflow-y:auto;max-width:calc(100vw - 44px)}
 .site-popup-stack .site-popup-live{position:relative;bottom:auto;left:auto;animation:popup-in .25s ease-out}
 @media(max-width:500px){.site-popup-stack{bottom:12px;left:12px;max-height:calc(100dvh - 24px);max-width:calc(100vw - 24px)}.site-popup-stack .site-popup-live{width:calc(100vw - 24px)}}
+
+
+/* H&R Legacy : optimisation smartphones et tablettes */
+.mobile-menu-toggle{display:none;align-items:center;justify-content:center;flex-direction:column;gap:5px;width:46px;height:46px;border:1px solid #354452;border-radius:11px;background:#263443;color:#edf2f7;cursor:pointer;flex-shrink:0}
+.mobile-menu-toggle span{display:block;width:21px;height:2px;background:currentColor;border-radius:3px;transition:transform .2s,opacity .2s}
+.mobile-menu-toggle[aria-expanded="true"] span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.mobile-menu-toggle[aria-expanded="true"] span:nth-child(2){opacity:0}
+.mobile-menu-toggle[aria-expanded="true"] span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+@media(max-width:800px){
+  .container{width:calc(100% - 32px)}
+  .site-header .nav{min-height:68px;flex-wrap:wrap;gap:0;position:relative;padding:10px 0}
+  .site-header .brand{font-size:1.13rem;max-width:calc(100% - 60px)}
+  .mobile-menu-toggle{display:flex}
+  .site-header .nav-links{display:none!important;flex-basis:100%;width:100%;flex-direction:column;align-items:stretch;gap:6px;padding:12px 0 4px}
+  .site-header .nav-links.mobile-open{display:flex!important}
+  .site-header .nav-links a{display:flex;justify-content:flex-start;width:100%;min-height:46px;padding:12px 16px;border-radius:10px}
+  .hero{min-height:410px;padding:70px 0}
+  .hero h1{font-size:clamp(2.1rem,8vw,3.6rem)}
+  .section{padding:44px 0}
+  .page-head{padding:38px 0 24px}
+  .grid,.stat-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .layout{grid-template-columns:1fr}
+  .footer-content,.footer-bottom{gap:18px;flex-wrap:wrap}
+  .admin-tabs{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;padding-bottom:14px}
+  .admin-tabs button{white-space:nowrap;flex-shrink:0}
+  .table-wrap{-webkit-overflow-scrolling:touch}
+  .data-table{min-width:580px}
+  .crop-stage{max-width:100%;touch-action:none}
+}
+@media(max-width:560px){
+  .container{width:calc(100% - 28px)}
+  .grid,.stat-row,.two,.filter-grid{grid-template-columns:1fr!important}
+  .panel{padding:18px}
+  .vehicle-card .card-image{height:210px}
+  .vehicle-card-body{padding:17px}
+  .vehicle-card-bottom{align-items:stretch}
+  .vehicle-card-action{width:100%}
+  .modal-vehicle-specs{grid-template-columns:1fr 1fr;gap:8px}
+  .modal-vehicle-specs>div{padding:12px}
+  .vehicle-modal{padding:8px}
+  .vehicle-modal-dialog{max-height:calc(100dvh - 16px)}
+  .modal-vehicle-info{padding:16px}
+  .hero-actions .btn{width:100%}
+  .filters-toolbar .btn-filters{width:100%}
+  .site-popup-stack{max-height:55dvh;overflow-y:auto}
+  .site-popup{width:min(380px,calc(100vw - 24px))}
+  input,select,textarea{font-size:16px!important}
+}
+@media(hover:none){.card:hover,.btn:hover{transform:none}}
+
+/* Correction du prix dans la fenêtre « Voir le véhicule » (thème bleu nuit). */
+.vehicle-modal .modal-vehicle-price strong,
+.vehicle-modal-dialog .modal-vehicle-price strong {
+  color: #ffffff !important;
+}
+.vehicle-modal .modal-vehicle-price span,
+.vehicle-modal-dialog .modal-vehicle-price span {
+  color: #c6d2df !important;
+}

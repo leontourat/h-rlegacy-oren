@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="fr">
+ <head>
+<meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <meta content="H&amp;R Legacy, concessionnaire automobile à San Andreas." name="description"/>
+  <title>
+   Administration | H&amp;R Legacy
+  </title>
+  <link href="assets/css/style.css" rel="stylesheet"/>
+  <script defer="" src="assets/js/config.js">
+  </script>
+  <script defer="" src="assets/js/app.js">
+  </script>
+ </head>
+ <body data-page="admin">
+  <div id="header">
+  </div>
+  <main>
+   <div class="container">
+    <div class="page-head">
+     <h1>
+      Administration
+     </h1>
+     <p class="muted">
+      Espace réservé à l'équipe H&amp;R Legacy.
+     </p>
+    </div>
+    <div id="status">
+    </div>
+    <div class="panel" id="login-panel" style="max-width:480px">
+     <h2>
+      Connexion
+     </h2>
+     <form id="login-form">
+      <div class="field">
+       <label for="admin-code">
+        Code administrateur
+       </label>
+       <input autocomplete="current-password" id="admin-code" name="code" placeholder="Saisir le code unique" required="" type="password"/>
+      </div>
+      <button class="btn">
+       Se connecter
+      </button>
+     </form>
+    </div>
+    <div class="hidden" id="admin-panel">
+     <button class="btn outline small" id="logout">
+      Déconnexion
+     </button>
+     <div class="stat-row" style="margin-top:20px">
+      <div class="stat">
+       Véhicules
+       <strong id="count-v">
+        0
+       </strong>
+      </div>
+      <div class="stat">
+       Actualités
+       <strong id="count-n">
+        0
+       </strong>
+      </div>
+     </div>
+     <div class="admin-tabs">
+      <button class="active" data-tab="vehicles">
+       Véhicules
+      </button>
+      <button data-tab="news">
+       Actualités
+      </button>
+      <button data-tab="categories">
+       Catégories
+      </button>
+      <button data-tab="notifications">Notifications</button>
+      <button data-tab="appearance">
+       Apparence
+      </button>
+     </div>
+     <section data-pane="vehicles">
+      <div class="panel">
+       <h2 id="vehicle-form-title">
+        Ajouter un véhicule
+       </h2>
+       <form id="vehicle-form">
+        <input id="v-id" name="id" type="hidden"/>
+        <div class="two">
+         <div class="field">
+          <label>
+           Modèle *
+          </label>
+          <input id="v-name" maxlength="120" name="name" required=""/>
+         </div>
+         <div class="field">
+          <label>
+           Marque *
+          </label>
+          <input id="v-brand" maxlength="100" name="brand" required=""/>
+         </div>
+         <div class="field">
+          <label>
+           Catégorie *
+          </label>
+          <select id="v-category" name="category">
+           <option value="">
+            Chargement des catégories…
+           </option>
+          </select>
+         </div>
+         <div class="field">
+          <label>
+           Prix *
+          </label>
+          <input id="v-price" min="0" name="price" required="" step="1" type="number"/>
+         </div>
+         <div class="field">
+          <label for="v-seats">
+           Nombre de places *
+          </label>
+          <input id="v-seats" min="0" required="" step="1" type="number" value="0"/>
+         </div>
+         <div class="field">
+          <label for="v-trunk">
+           Poids coffre (kg) *
+          </label>
+          <input id="v-trunk" min="0" required="" step="1" type="number" value="0"/>
+         </div>
+         <div class="field">
+          <label>
+           Disponibilité
+          </label>
+          <select id="v-status" name="status">
+           <option value="available">
+            Disponible
+           </option>
+           <option value="reserved">
+            Réservé
+           </option>
+           <option value="sold">
+            Vendu
+           </option>
+          </select>
+         </div>
+        </div>
+        <div class="field">
+         <label>
+          URL de la photo (https://)
+         </label>
+         <input id="v-image-url" name="image_url" type="url"/>
+        </div>
+        <div class="crop-editor field">
+          <label>Rognage de la photo du véhicule</label>
+          <p class="muted">Déplacez directement la photo avec la souris ou le doigt. Ajustez le zoom pour la faire rentrer dans le cadre. Le quadrillage aide à aligner le véhicule.</p>
+          <div id="v-crop-area" class="crop-stage" aria-label="Zone de cadrage déplaçable">
+            <img id="v-crop-preview" class="crop-stage-image" src="assets/img/showroom.svg" alt="Aperçu du cadrage" draggable="false"/>
+            <div class="crop-grid" aria-hidden="true"></div>
+          </div>
+          <input id="v-crop-x" type="hidden" value="50"/>
+          <input id="v-crop-y" type="hidden" value="50"/>
+          <div class="field"><label for="v-crop-zoom">Taille de l'image : <output id="v-crop-zoom-value">100 %</output></label><input id="v-crop-zoom" type="range" min="0.5" max="3" step="0.01" value="1"/></div>
+          <button id="v-crop-reset" class="btn outline small" type="button">Réinitialiser le cadrage</button>
+        </div>
+        <label>
+         <input id="v-featured" type="checkbox"/>
+         Mettre à la une
+        </label>
+        <div class="field">
+         <label>
+          Description
+         </label>
+         <textarea id="v-description" name="description"></textarea>
+        </div>
+        <button class="btn">
+         Enregistrer le véhicule
+        </button>
+        <button class="btn outline" id="reset-v" type="button">
+         Réinitialiser
+        </button>
+       </form>
+      </div>
+      <div class="panel" style="margin-top:20px">
+       <h2>
+        Liste des véhicules
+       </h2>
+       <div class="table-wrap">
+        <table class="data-table">
+         <thead>
+          <tr>
+           <th>
+            Modèle
+           </th>
+           <th>
+            Prix
+           </th>
+           <th>
+            État
+           </th>
+           <th>
+            Actions
+           </th>
+          </tr>
+         </thead>
+         <tbody id="admin-vehicles">
+         </tbody>
+        </table>
+       </div>
+      </div>
+     </section>
+     <section class="hidden" data-pane="news">
+      <div class="panel">
+       <h2 id="news-form-title">
+        Ajouter une actualité
+       </h2>
+       <form id="news-form">
+        <input id="n-id" name="id" type="hidden"/>
+        <div class="field">
+         <label>
+          Titre *
+         </label>
+         <input id="n-title" maxlength="180" name="title" required=""/>
+        </div>
+        <div class="field">
+         <label>
+          Image (URL)
+         </label>
+         <input id="n-image-url" name="image_url" type="url"/>
+        </div>
+        <div class="field">
+         <label>
+          Contenu *
+         </label>
+         <textarea id="n-content" name="content" required=""></textarea>
+        </div>
+        <label>
+         <input checked="" id="n-published" name="published" type="checkbox"/>
+         Publier cette actualité
+        </label>
+        <p>
+         <button class="btn">
+          Enregistrer l'actualité
+         </button>
+         <button class="btn outline" id="reset-n" type="button">
+          Réinitialiser
+         </button>
+        </p>
+       </form>
+      </div>
+      <div class="panel" style="margin-top:20px">
+       <h2>
+        Liste des actualités
+       </h2>
+       <div class="table-wrap">
+        <table class="data-table">
+         <thead>
+          <tr>
+           <th>
+            Titre
+           </th>
+           <th>
+            Statut
+           </th>
+           <th>
+            Actions
+           </th>
+          </tr>
+         </thead>
+         <tbody id="admin-news">
+         </tbody>
+        </table>
+       </div>
+      </div>
+     </section>
+     <section class="hidden" data-pane="notifications">
+      <div class="panel">
+       <h2 id="notification-form-title">Créer une notification</h2>
+       <p>La notification apparaît en bas à gauche sur les pages publiques uniquement.</p>
+       <form id="notification-form">
+        <input type="hidden" id="notification-id"/>
+        <div class="field"><label for="notification-title">Titre *</label><input id="notification-title" maxlength="120" required/></div>
+        <div class="field"><label for="notification-description">Description *</label><textarea id="notification-description" maxlength="800" required></textarea></div>
+        <div class="field"><label for="notification-image">Image (URL HTTPS, facultative)</label><input id="notification-image" type="url" placeholder="https://..."/></div>
+        <label><input type="checkbox" id="notification-active" checked/> Afficher cette notification aux visiteurs</label>
+        <p><button class="btn" type="submit">Enregistrer la notification</button> <button class="btn outline" id="notification-reset" type="button">Nouveau</button></p>
+       </form>
+       <h3>Prévisualisation en direct</h3>
+       <div class="notification-preview-area"><div id="notification-preview" class="site-popup site-popup-preview"></div></div>
+      </div>
+      <div class="panel" style="margin-top:20px"><h2>Notifications enregistrées</h2><p id="notification-active-counter">0/3 notifications actives</p><div class="table-wrap"><table class="data-table"><thead><tr><th>Titre</th><th>État</th><th>Actions</th></tr></thead><tbody id="admin-notifications"></tbody></table></div></div>
+     </section>
+     <section class="hidden" data-pane="categories">
+      <div class="panel">
+       <h2>
+        Catégories de véhicules
+       </h2>
+       <p class="muted">
+        Ajoutez les catégories proposées dans le formulaire véhicule et le catalogue.
+       </p>
+       <form class="inline-admin-form" id="category-form">
+        <input id="cat-id" type="hidden"/>
+        <div class="field">
+         <label for="cat-name">
+          Nom de la catégorie
+         </label>
+         <input id="cat-name" maxlength="60" placeholder="Ex. : Collection, Luxe, 4x4" required=""/>
+        </div>
+        <button class="btn" type="submit">
+         Enregistrer
+        </button>
+        <button class="btn outline" id="reset-cat" type="button">
+         Annuler
+        </button>
+       </form>
+       <div class="table-wrap">
+        <table class="data-table">
+         <thead>
+          <tr>
+           <th>
+            Catégorie
+           </th>
+           <th>
+            Véhicules
+           </th>
+           <th>
+            Actions
+           </th>
+          </tr>
+         </thead>
+         <tbody id="admin-categories">
+         </tbody>
+        </table>
+       </div>
+      </div>
+     </section>
+     <section class="hidden" data-pane="appearance">
+      <div class="panel">
+       <h2>
+        Images et identité du site
+       </h2>
+       <p class="muted">
+        Collez des liens HTTPS vers vos images. Les modifications apparaissent sur les pages publiques après enregistrement.
+       </p>
+       <form id="appearance-form">
+        <div class="appearance-fields">
+         <div class="field">
+          <label for="a-logo">
+           Logo du site (URL HTTPS)
+          </label>
+          <input id="a-logo" placeholder="https://.../logo.png" type="url"/>
+          <img alt="Aperçu du logo" class="appearance-preview" id="preview-logo"/>
+         </div>
+         <div class="field">
+          <label for="a-hero">
+           Image de fond de l'accueil
+          </label>
+          <input id="a-hero" placeholder="https://.../accueil.jpg" type="url"/>
+          <img alt="Aperçu de l'accueil" class="appearance-preview" id="preview-hero"/>
+         </div>
+         <div class="field">
+          <label for="a-catalogue">
+           Bannière du catalogue
+          </label>
+          <input id="a-catalogue" placeholder="https://.../catalogue.jpg" type="url"/>
+          <img alt="Aperçu du catalogue" class="appearance-preview" id="preview-catalogue"/>
+         </div>
+         <div class="field">
+          <label for="a-news">
+           Bannière des actualités
+          </label>
+          <input id="a-news" placeholder="https://.../actualites.jpg" type="url"/>
+          <img alt="Aperçu des actualités" class="appearance-preview" id="preview-news"/>
+         </div>
+        </div>
+        <button class="btn" type="submit">
+         Enregistrer les modifications
+        </button>
+       </form>
+      </div>
+     </section>
+    </div>
+   </div>
+  </main>
+  <div id="footer">
+  </div>
+ </body>
+</html>

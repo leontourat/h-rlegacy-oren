@@ -187,7 +187,7 @@ async function refreshAdmin(){
   preview.style.cssText=cropStyle({crop_x:$("#v-crop-x").value,crop_y:$("#v-crop-y").value,crop_zoom:$("#v-crop-zoom").value});
   $("#v-crop-zoom-value").textContent=Math.round(Number($("#v-crop-zoom").value)*100)+" %";
  }
-function resetVehicle(){$("#vehicle-form").reset();$("#v-id").value="";$("#v-crop-x").value=50;$("#v-crop-y").value=50;$("#v-crop-zoom").value=1;updateCropPreview();$("#vehicle-form-title").textContent="Ajouter un véhicule";}
+function resetVehicle(){$("#vehicle-form").reset();$("#v-brand").value="H&R Legacy";$("#v-id").value="";$("#v-crop-x").value=50;$("#v-crop-y").value=50;$("#v-crop-zoom").value=1;updateCropPreview();$("#vehicle-form-title").textContent="Ajouter un véhicule";}
 function resetNews(){$("#news-form").reset();$("#n-id").value="";$("#news-form-title").textContent="Ajouter une actualité";}
 function refreshAppearanceForm(){
  const mapping={"a-logo":"site_logo_image","a-hero":"site_hero_image","a-catalogue":"site_catalogue_image","a-news":"site_news_image"};

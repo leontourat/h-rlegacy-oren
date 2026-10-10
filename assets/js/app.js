@@ -196,6 +196,31 @@ async function refreshAdmin(){
   preview.style.cssText=cropStyle({crop_x:$("#v-crop-x").value,crop_y:$("#v-crop-y").value,crop_zoom:$("#v-crop-zoom").value});
   $("#v-crop-zoom-value").textContent=Math.round(Number($("#v-crop-zoom").value)*100)+" %";
  }
+let pendingVehicleImage=null;
+async function uploadVehicleImage(file){
+ if(!file || !file.type.startsWith("image/"))throw Error("Choisis une image JPEG, PNG ou WebP.");
+ if(file.size>5*1024*1024)throw Error("Image trop volumineuse (maximum 5 Mo).");
+ const status=$("#v-upload-status");status.textContent="Envoi de l’image…";
+ const headers={"Content-Type":file.type};if(token())headers.Authorization="Bearer "+token();
+ try{
+  const response=await fetch(API+"/api/admin/upload-vehicle-image",{method:"POST",headers,body:file});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw Error(data.error||"Échec de l’envoi de l’image.");
+  $("#v-image-url").value=data.url;pendingVehicleImage=null;updateCropPreview();
+  status.textContent="Image importée ! Ajuste maintenant le cadrage.";
+ }catch(e){status.textContent=e.message;throw e;}
+}
+function initVehicleUpload(){
+ const zone=$("#v-image-drop"),input=$("#v-image-file"),status=$("#v-upload-status");if(!zone||!input)return;
+ const handle=async file=>{try{await uploadVehicleImage(file);}catch(e){notice(e.message,true);}};
+ input.addEventListener("change",()=>{if(input.files?.[0])handle(input.files[0]);input.value="";});
+ zone.addEventListener("click",e=>{if(e.target!==input)input.click();});
+ zone.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();input.click();}});
+ for(const name of ["dragenter","dragover"]){zone.addEventListener(name,e=>{e.preventDefault();zone.classList.add("drag-over");});}
+ for(const name of ["dragleave","drop"]){zone.addEventListener(name,e=>{e.preventDefault();zone.classList.remove("drag-over");});}
+ zone.addEventListener("drop",e=>{const file=[...(e.dataTransfer?.files||[])].find(f=>f.type.startsWith("image/"));if(file)handle(file);else status.textContent="Dépose une image valide.";});
+ document.addEventListener("paste",e=>{if(page!=="admin"||$("#admin-panel")?.hidden)return;const file=[...(e.clipboardData?.items||[])].find(i=>i.type.startsWith("image/"))?.getAsFile();if(file){e.preventDefault();handle(file);}});
+}
 function resetVehicle(){$("#vehicle-form").reset();$("#v-brand").value="H&R Legacy";$("#v-id").value="";$("#v-crop-x").value=50;$("#v-crop-y").value=50;$("#v-crop-zoom").value=1;updateCropPreview();$("#vehicle-form-title").textContent="Ajouter un véhicule";}
 function resetNews(){$("#news-form").reset();$("#n-id").value="";$("#news-form-title").textContent="Ajouter une actualité";}
 function refreshAppearanceForm(){
@@ -268,7 +293,7 @@ async function adminPage(){
  const endDrag=e=>{if(drag&&e.pointerId===drag.id){drag=null;cropArea.classList.remove("dragging");}};
  cropArea.addEventListener("pointerup",endDrag);cropArea.addEventListener("pointercancel",endDrag);
  $("#v-crop-reset").onclick=()=>{$("#v-crop-x").value=50;$("#v-crop-y").value=50;$("#v-crop-zoom").value=1;updateCropPreview();};
- updateCropPreview();
+ updateCropPreview();initVehicleUpload();
  $("#reset-v").onclick=resetVehicle;$("#reset-n").onclick=resetNews;
  $("#vehicle-form").onsubmit=async e=>{e.preventDefault();const id=$("#v-id").value;
   const b={brand:$("#v-brand").value,model:$("#v-name").value,category:$("#v-category").value,price:Number($("#v-price").value),description:$("#v-description").value,image_url:$("#v-image-url").value,status:$("#v-status").value,featured:$("#v-featured").checked,seats:Number($("#v-seats").value),trunk_kg:Number($("#v-trunk").value),crop_x:Number($("#v-crop-x").value),crop_y:Number($("#v-crop-y").value),crop_zoom:Number($("#v-crop-zoom").value)};

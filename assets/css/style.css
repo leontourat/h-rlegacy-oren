@@ -406,3 +406,8 @@ html,body,main{background:#111820!important;color:var(--ink)}
 .vehicle-modal-dialog .modal-vehicle-price span {
   color: #c6d2df !important;
 }
+
+/* Import des photos des véhicules */
+.vehicle-upload-zone{border:2px dashed #526579;border-radius:14px;background:#192734;color:#f4f7fb;min-height:115px;padding:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;text-align:center;cursor:pointer;transition:.2s}
+.vehicle-upload-zone span{font-size:.87rem;color:#a9b8c7}
+.vehicle-upload-zone:hover,.vehicle-upload-zone.drag-over,.vehicle-upload-zone:focus-visible{border-color:#b8d8ff;background:#26384a;outline:none}

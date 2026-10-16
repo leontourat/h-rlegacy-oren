@@ -147,7 +147,7 @@ async function publicPage(){
   initVehicleModal();
   const cats=(await api("/api/categories")).map(c=>c.name);
   $("#category").innerHTML='<option value="">Toutes les catégories</option>'+cats.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join("");
-  const ids=["search","category","price-min","price-max","seats-filter","trunk-min","trunk-max"];
+  const ids=["search","category","price-min","price-max","seats-filter","trunk-min","trunk-max","catalogue-price-sort"];
   const bound=(v,min,max)=>{
    const lo=$("#"+min)?.value ?? "",hi=max ? ($("#"+max)?.value ?? "") : "";
    return (lo===""||Number(v)>=Number(lo))&&(hi===""||Number(v)<=Number(hi));
@@ -155,6 +155,9 @@ async function publicPage(){
   const render=()=>{
    const q=$("#search").value.trim().toLowerCase(),c=$("#category").value;
    const rows=vehicles.filter(v=>(v.brand+" "+v.model).toLowerCase().includes(q)&&(!c||v.category===c)&&bound(v.price,"price-min","price-max")&&(!$("#seats-filter").value||Number(v.seats)===Number($("#seats-filter").value))&&bound(v.trunk_kg,"trunk-min","trunk-max"));
+   const priceOrder=$("#catalogue-price-sort").value;
+   if(priceOrder==="asc") rows.sort((a,b)=>Number(a.price||0)-Number(b.price||0));
+   if(priceOrder==="desc") rows.sort((a,b)=>Number(b.price||0)-Number(a.price||0));
    $("#results").textContent=rows.length+" véhicule(s)";
    $("#vehicle-grid").innerHTML=rows.map(vehicleCard).join("")||"<p>Aucun véhicule ne correspond à ces filtres.</p>";
   };
@@ -181,7 +184,7 @@ function adminRows(){
  if(priceSort==="asc")listedVehicles.sort((a,b)=>Number(a.price||0)-Number(b.price||0));
  if(priceSort==="desc")listedVehicles.sort((a,b)=>Number(b.price||0)-Number(a.price||0));
  $("#admin-vehicles").innerHTML=listedVehicles.map(v=>`<tr><td data-label="Modèle"><span class="vehicle-table-name">${esc([v.brand,v.model].filter(Boolean).join(" "))}</span><span class="vehicle-table-category">${esc(v.category||"Véhicule")}</span></td><td data-label="Prix"><strong class="vehicle-table-price">${money(v.price)}</strong></td><td data-label="Actions"><div class="vehicle-table-actions"><button class="btn outline small" data-edit-v="${v.id}" type="button">Modifier</button><button class="btn outline small vehicle-delete-btn" data-del-v="${v.id}" type="button">Supprimer</button></div></td></tr>`).join("");
- $("#admin-news").innerHTML=news.map(n=>`<tr><td>${esc(n.title)}</td><td>${n.published?"Publiée":"Brouillon"}</td><td><button class="btn outline small" data-edit-n="${n.id}">Modifier</button> <button class="btn outline small" data-del-n="${n.id}">Supprimer</button></td></tr>`).join("");
+ $("#admin-news").innerHTML=news.map(n=>`<tr><td data-label="Titre"><span class="vehicle-table-name">${esc(n.title)}</span></td><td data-label="Statut"><span class="admin-state ${n.published?"is-active":"is-inactive"}">${n.published?"Publiée":"Brouillon"}</span></td><td data-label="Actions"><div class="vehicle-table-actions"><button class="btn outline small" data-edit-n="${n.id}">Modifier</button><button class="btn outline small vehicle-delete-btn" data-del-n="${n.id}">Supprimer</button></div></td></tr>`).join("");
 }
 async function refreshCategories(){
  categories=await api("/api/categories");
@@ -189,7 +192,7 @@ async function refreshCategories(){
  $("#v-category").innerHTML='<option value="">Choisir une catégorie</option>'+categories.map(c=>`<option value="${esc(c.name)}">${esc(c.name)}</option>`).join("");
  if(categories.some(c=>c.name===chosen)) $("#v-category").value=chosen;
  const counts=Object.fromEntries(categories.map(c=>[c.name,vehicles.filter(v=>v.category===c.name).length]));
- $("#admin-categories").innerHTML=categories.map(c=>`<tr><td>${esc(c.name)}</td><td>${counts[c.name]}</td><td><button class="btn outline small" data-edit-cat="${c.id}">Renommer</button> <button class="btn outline small" data-del-cat="${c.id}">Supprimer</button></td></tr>`).join("");
+ $("#admin-categories").innerHTML=categories.map(c=>`<tr><td data-label="Catégorie"><span class="vehicle-table-name">${esc(c.name)}</span></td><td data-label="Véhicules"><span class="admin-count">${counts[c.name]}</span></td><td data-label="Actions"><div class="vehicle-table-actions"><button class="btn outline small" data-edit-cat="${c.id}">Renommer</button><button class="btn outline small vehicle-delete-btn" data-del-cat="${c.id}">Supprimer</button></div></td></tr>`).join("");
 }
 async function refreshAdmin(){
  [vehicles,news]=await Promise.all([api("/api/vehicles"),api("/api/admin/news",{auth:true})]);adminRows();await refreshCategories();
@@ -240,7 +243,7 @@ async function loadAdminNotifications(){
  adminNotifications=await api("/api/admin/notifications",{auth:true});
  const activeCount=adminNotifications.filter(n=>n.active).length;
  const counter=$("#notification-active-counter");if(counter)counter.textContent=`${activeCount}/3 notifications actives`;
- $("#admin-notifications").innerHTML=adminNotifications.map(n=>`<tr><td>${esc(n.title)}</td><td>${n.active?"Active":"Désactivée"}</td><td><button class="btn outline small" data-edit-notification="${n.id}">Modifier</button> <button class="btn outline small" data-delete-notification="${n.id}">Supprimer</button></td></tr>`).join("")||'<tr><td colspan="3">Aucune notification</td></tr>';
+ $("#admin-notifications").innerHTML=adminNotifications.map(n=>`<tr><td data-label="Titre"><span class="vehicle-table-name">${esc(n.title)}</span></td><td data-label="État"><span class="admin-state ${n.active?"is-active":"is-inactive"}">${n.active?"Active":"Désactivée"}</span></td><td data-label="Actions"><div class="vehicle-table-actions"><button class="btn outline small" data-edit-notification="${n.id}">Modifier</button><button class="btn outline small vehicle-delete-btn" data-delete-notification="${n.id}">Supprimer</button></div></td></tr>`).join("")||'<tr><td colspan="3">Aucune notification</td></tr>';
 }
 function updateNotificationPreview(){
  $("#notification-preview").innerHTML=notificationMarkup({title:$("#notification-title").value,description:$("#notification-description").value,image_url:$("#notification-image").value},true);

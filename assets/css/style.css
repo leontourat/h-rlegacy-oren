@@ -445,3 +445,26 @@ html,body,main{background:#111820!important;color:var(--ink)}
 
 /* Tableau véhicules sans colonne État */
 .vehicle-admin-table th:nth-child(2),.vehicle-admin-table td:nth-child(2){text-align:right}
+
+/* Tableaux harmonisés : actualités, notifications, catégories */
+.vehicle-list-panel .unified-admin-table{border-collapse:separate!important;border-spacing:0!important;width:100%;min-width:560px}
+.vehicle-list-panel .unified-admin-table thead th{background:#283849!important;color:#b9c9da!important;padding:16px 18px!important;font-size:.75rem;letter-spacing:.09em;text-transform:uppercase;border-bottom:1px solid #415268!important}
+.vehicle-list-panel .unified-admin-table tbody td{background:#1b2530!important;color:#edf3fa!important;padding:17px 18px!important;border-bottom:1px solid #2f4052!important;vertical-align:middle}
+.vehicle-list-panel .unified-admin-table tbody tr:hover td{background:#223244!important}
+.vehicle-list-panel .unified-admin-table tbody tr:last-child td{border-bottom:0!important}
+.vehicle-list-panel .unified-admin-table td:last-child{min-width:195px}
+.admin-state{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:7px 12px;font-size:.8rem;font-weight:700;white-space:nowrap}
+.admin-state:before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.admin-state.is-active{background:#193e37;color:#a9f1d0}
+.admin-state.is-inactive{background:#35404e;color:#c3cddd}
+.admin-count{display:inline-flex;align-items:center;justify-content:center;min-width:34px;padding:7px 10px;background:#2b4054;border-radius:9px;color:#f2f7ff;font-weight:800;font-variant-numeric:tabular-nums}
+.vehicle-list-panel .unified-admin-table .vehicle-table-actions{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:700px){
+.vehicle-list-panel .unified-admin-table{min-width:0!important}
+.vehicle-list-panel .unified-admin-table thead{display:none}
+.vehicle-list-panel .unified-admin-table,.vehicle-list-panel .unified-admin-table tbody,.vehicle-list-panel .unified-admin-table tr,.vehicle-list-panel .unified-admin-table td{display:block;width:100%}
+.vehicle-list-panel .unified-admin-table tbody tr{padding:12px 14px;border-bottom:1px solid #35485a}
+.vehicle-list-panel .unified-admin-table tbody td{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:9px 0!important;border:0!important;min-width:0;text-align:right}
+.vehicle-list-panel .unified-admin-table tbody td:before{content:attr(data-label);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:#9eafc1;font-weight:700;text-align:left;flex-shrink:0}
+.vehicle-list-panel .unified-admin-table tbody td .vehicle-table-actions{justify-content:flex-end}
+}

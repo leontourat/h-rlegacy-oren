@@ -176,7 +176,11 @@ async function publicPage(){
 function setLogged(logged){$("#login-panel").classList.toggle("hidden",logged);$("#admin-panel").classList.toggle("hidden",!logged);}
 function adminRows(){
  $("#count-v").textContent=vehicles.length;$("#count-n").textContent=news.length;
- $("#admin-vehicles").innerHTML=vehicles.map(v=>`<tr><td>${esc(v.brand+" "+v.model)}</td><td>${money(v.price)}</td><td>${esc(statuses[v.status])}</td><td><button class="btn outline small" data-edit-v="${v.id}">Modifier</button> <button class="btn outline small" data-del-v="${v.id}">Supprimer</button></td></tr>`).join("");
+ const priceSort=$("#admin-vehicle-price-sort")?.value||"default";
+ const listedVehicles=[...vehicles];
+ if(priceSort==="asc")listedVehicles.sort((a,b)=>Number(a.price||0)-Number(b.price||0));
+ if(priceSort==="desc")listedVehicles.sort((a,b)=>Number(b.price||0)-Number(a.price||0));
+ $("#admin-vehicles").innerHTML=listedVehicles.map(v=>`<tr><td data-label="Modèle"><span class="vehicle-table-name">${esc([v.brand,v.model].filter(Boolean).join(" "))}</span><span class="vehicle-table-category">${esc(v.category||"Véhicule")}</span></td><td data-label="Prix"><strong class="vehicle-table-price">${money(v.price)}</strong></td><td data-label="Actions"><div class="vehicle-table-actions"><button class="btn outline small" data-edit-v="${v.id}" type="button">Modifier</button><button class="btn outline small vehicle-delete-btn" data-del-v="${v.id}" type="button">Supprimer</button></div></td></tr>`).join("");
  $("#admin-news").innerHTML=news.map(n=>`<tr><td>${esc(n.title)}</td><td>${n.published?"Publiée":"Brouillon"}</td><td><button class="btn outline small" data-edit-n="${n.id}">Modifier</button> <button class="btn outline small" data-del-n="${n.id}">Supprimer</button></td></tr>`).join("");
 }
 async function refreshCategories(){
@@ -246,6 +250,7 @@ function resetNotificationForm(){
  $("#notification-form-title").textContent="Créer une notification";updateNotificationPreview();
 }
 async function adminPage(){
+ $("#admin-vehicle-price-sort")?.addEventListener("change",adminRows);
  $("#login-form").onsubmit=async e=>{e.preventDefault();try{
   const result=await api("/api/admin/login",{method:"POST",body:{code:$("#admin-code").value}});
   sessionStorage.setItem("hr_admin_token",result.token);$("#admin-code").value="";
@@ -296,7 +301,7 @@ async function adminPage(){
  updateCropPreview();initVehicleUpload();
  $("#reset-v").onclick=resetVehicle;$("#reset-n").onclick=resetNews;
  $("#vehicle-form").onsubmit=async e=>{e.preventDefault();const id=$("#v-id").value;
-  const b={brand:$("#v-brand").value,model:$("#v-name").value,category:$("#v-category").value,price:Number($("#v-price").value),description:$("#v-description").value,image_url:$("#v-image-url").value,status:$("#v-status").value,featured:$("#v-featured").checked,seats:Number($("#v-seats").value),trunk_kg:Number($("#v-trunk").value),crop_x:Number($("#v-crop-x").value),crop_y:Number($("#v-crop-y").value),crop_zoom:Number($("#v-crop-zoom").value)};
+  const b={brand:$("#v-brand").value,model:$("#v-name").value,category:$("#v-category").value,price:Number($("#v-price").value),description:$("#v-description").value,image_url:$("#v-image-url").value,status:(id ? (vehicles.find(v=>String(v.id)===String(id))?.status || "available") : "available"),featured:$("#v-featured").checked,seats:Number($("#v-seats").value),trunk_kg:Number($("#v-trunk").value),crop_x:Number($("#v-crop-x").value),crop_y:Number($("#v-crop-y").value),crop_zoom:Number($("#v-crop-zoom").value)};
   try{await api("/api/admin/vehicles"+(id?"/"+id:""),{auth:true,method:id?"PUT":"POST",body:b});resetVehicle();await refreshAdmin();notice("Véhicule enregistré.");}catch(err){notice(err.message,true);}
  };
  $("#news-form").onsubmit=async e=>{e.preventDefault();const id=$("#n-id").value;
@@ -305,7 +310,7 @@ async function adminPage(){
  $("#admin-panel").addEventListener("click",async e=>{
   const b=e.target.closest("button");if(!b)return;
   let id;
-  if(id=b.dataset.editV){const v=vehicles.find(x=>x.id===Number(id));if(!v)return;$("#v-id").value=v.id;$("#v-name").value=v.model;$("#v-brand").value=v.brand;$("#v-category").value=v.category;$("#v-price").value=v.price;$("#v-seats").value=v.seats??0;$("#v-trunk").value=v.trunk_kg??0;$("#v-status").value=v.status;$("#v-image-url").value=v.image_url||"";$("#v-crop-x").value=v.crop_x??50;$("#v-crop-y").value=v.crop_y??50;$("#v-crop-zoom").value=v.crop_zoom??1;updateCropPreview();$("#v-description").value=v.description||"";$("#v-featured").checked=!!v.featured;$("#vehicle-form-title").textContent="Modifier le véhicule";$("#vehicle-form").scrollIntoView({behavior:"smooth"});}
+  if(id=b.dataset.editV){const v=vehicles.find(x=>x.id===Number(id));if(!v)return;$("#v-id").value=v.id;$("#v-name").value=v.model;$("#v-brand").value=v.brand;$("#v-category").value=v.category;$("#v-price").value=v.price;$("#v-seats").value=v.seats??0;$("#v-trunk").value=v.trunk_kg??0;$("#v-image-url").value=v.image_url||"";$("#v-crop-x").value=v.crop_x??50;$("#v-crop-y").value=v.crop_y??50;$("#v-crop-zoom").value=v.crop_zoom??1;updateCropPreview();$("#v-description").value=v.description||"";$("#v-featured").checked=!!v.featured;$("#vehicle-form-title").textContent="Modifier le véhicule";$("#vehicle-form").scrollIntoView({behavior:"smooth"});}
   if(id=b.dataset.editN){const n=news.find(x=>x.id===Number(id));if(!n)return;$("#n-id").value=n.id;$("#n-title").value=n.title;$("#n-content").value=n.content;$("#n-image-url").value=n.image_url||"";$("#n-published").checked=!!n.published;$("#news-form-title").textContent="Modifier l'actualité";$("#news-form").scrollIntoView({behavior:"smooth"});}
   if(id=b.dataset.delV){if(!confirm("Supprimer ce véhicule ?"))return;try{await api("/api/admin/vehicles/"+id,{auth:true,method:"DELETE"});await refreshAdmin();}catch(err){notice(err.message,true);}}
   if(id=b.dataset.delN){if(!confirm("Supprimer cette actualité ?"))return;try{await api("/api/admin/news/"+id,{auth:true,method:"DELETE"});await refreshAdmin();}catch(err){notice(err.message,true);}}

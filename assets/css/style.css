@@ -411,3 +411,37 @@ html,body,main{background:#111820!important;color:var(--ink)}
 .vehicle-upload-zone{border:2px dashed #526579;border-radius:14px;background:#192734;color:#f4f7fb;min-height:115px;padding:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;text-align:center;cursor:pointer;transition:.2s}
 .vehicle-upload-zone span{font-size:.87rem;color:#a9b8c7}
 .vehicle-upload-zone:hover,.vehicle-upload-zone.drag-over,.vehicle-upload-zone:focus-visible{border-color:#b8d8ff;background:#26384a;outline:none}
+
+/* Tri par prix : uniquement la liste des véhicules en administration */
+.admin-vehicle-list-header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.admin-vehicle-list-header h2{margin:0}
+.admin-vehicle-list-header label{display:flex;align-items:center;gap:10px;font-size:14px;color:#dce5ef}
+.admin-vehicle-list-header select{background:#263646;color:#fff;border:1px solid #435569;border-radius:9px;padding:9px 12px;max-width:100%}
+@media(max-width:600px){.admin-vehicle-list-header label{width:100%;flex-wrap:wrap}.admin-vehicle-list-header select{flex:1;min-width:170px}}
+
+/* H&R Legacy — tableau véhicules administration */
+.vehicle-list-panel{background:#1b2530!important;border:1px solid #334354!important;border-radius:18px!important;padding:24px!important;box-shadow:0 16px 40px #00000018}
+.vehicle-list-panel .admin-vehicle-list-header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.vehicle-list-panel .admin-vehicle-list-header h2{margin:0;color:#f3f7fc;font-size:1.3rem}
+.vehicle-list-panel .admin-vehicle-list-header label{display:flex;align-items:center;gap:12px;color:#b8c6d5;font-size:.9rem}
+.vehicle-list-panel #admin-vehicle-price-sort{background:#263647!important;color:#f5f8ff!important;border:1px solid #41556a!important;border-radius:10px;padding:10px 14px;min-height:42px}
+.vehicle-list-panel .table-wrap{border:1px solid #344659;border-radius:14px;overflow-x:auto}
+.vehicle-admin-table{border-collapse:separate!important;border-spacing:0!important;min-width:620px}
+.vehicle-admin-table thead th{background:#283849!important;color:#b9c9da!important;padding:16px 18px!important;font-size:.75rem;letter-spacing:.09em;border-bottom:1px solid #415268!important}
+.vehicle-admin-table tbody td{background:#1b2530!important;color:#edf3fa!important;padding:17px 18px!important;border-bottom:1px solid #2f4052!important}
+.vehicle-admin-table tbody tr:last-child td{border-bottom:0!important}
+.vehicle-admin-table tbody tr:hover td{background:#223244!important}
+.vehicle-table-name{display:block;font-weight:700;color:#f5f8ff;line-height:1.4}
+.vehicle-table-category{display:block;margin-top:5px;color:#9cacc0;font-size:.79rem}
+.vehicle-table-price{font-size:1rem;color:#f6f9ff;font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
+.vehicle-table-status{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border-radius:999px;background:#193e37;color:#a9f1d0;font-size:.79rem;font-weight:700;white-space:nowrap}
+.vehicle-table-status:before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor}
+.vehicle-table-actions{display:flex;gap:8px;flex-wrap:wrap}
+.vehicle-table-actions .btn{border-radius:9px!important;min-height:36px;padding:8px 12px!important;background:#2b4054!important;color:#edf4fd!important;border:1px solid #456078!important;font-weight:700}
+.vehicle-table-actions .btn:hover{background:#3a526a!important}
+.vehicle-table-actions .vehicle-delete-btn{background:#352832!important;color:#ffbdc4!important;border-color:#69414c!important}
+.vehicle-table-actions .vehicle-delete-btn:hover{background:#55313d!important}
+@media(max-width:700px){.vehicle-list-panel{padding:15px!important}.vehicle-list-panel .admin-vehicle-list-header{align-items:stretch}.vehicle-list-panel .admin-vehicle-list-header label{justify-content:space-between;flex-wrap:wrap}.vehicle-admin-table{min-width:0!important}.vehicle-admin-table thead{display:none}.vehicle-admin-table,.vehicle-admin-table tbody,.vehicle-admin-table tr,.vehicle-admin-table td{display:block;width:100%}.vehicle-admin-table tbody tr{padding:12px 14px;border-bottom:1px solid #35485a}.vehicle-admin-table tbody tr:last-child{border-bottom:0}.vehicle-admin-table tbody td{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:9px 0!important;border:0!important;text-align:right}.vehicle-admin-table tbody td:before{content:attr(data-label);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:#9eafc1;font-weight:700;text-align:left;flex-shrink:0}.vehicle-admin-table tbody td:first-child{align-items:flex-start}.vehicle-admin-table tbody td:first-child>span{text-align:right}.vehicle-table-actions{justify-content:flex-end}}
+
+/* Tableau véhicules sans colonne État */
+.vehicle-admin-table th:nth-child(2),.vehicle-admin-table td:nth-child(2){text-align:right}

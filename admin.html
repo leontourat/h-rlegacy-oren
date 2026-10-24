@@ -266,7 +266,26 @@
         <input type="hidden" id="notification-id"/>
         <div class="field"><label for="notification-title">Titre *</label><input id="notification-title" maxlength="120" required/></div>
         <div class="field"><label for="notification-description">Description *</label><textarea id="notification-description" maxlength="800" required></textarea></div>
-        <div class="field"><label for="notification-image">Image (URL HTTPS, facultative)</label><input id="notification-image" type="url" placeholder="https://..."/></div>
+        <input id="notification-image" type="hidden" />
+        <div class="notification-crop-editor" id="notification-crop-editor">
+         <div class="notification-upload-zone" id="notification-upload-zone" role="button" tabindex="0" aria-label="Importer une photo de notification">
+          <div class="notification-upload-icon" aria-hidden="true">↥</div>
+          <strong>Glissez votre image ici</strong>
+          <span>ou cliquez pour parcourir vos fichiers</span>
+          <small>Ctrl + V pour coller une capture · JPG, PNG, WebP · 5 Mo max.</small>
+          <span class="notification-upload-file" id="notification-upload-file" hidden></span>
+         </div>
+         <input type="file" id="notification-image-file" accept="image/jpeg,image/png,image/webp" aria-label="Choisir une image" />
+         <p class="muted notification-crop-help">Déplacez l'image à la souris ou au doigt et ajustez son zoom avant l'importation.</p>
+         <div class="notification-crop-stage" id="notification-crop-stage" aria-label="Zone de cadrage de l'image">
+          <canvas id="notification-crop-canvas" width="960" height="540"></canvas>
+          <div class="notification-crop-grid" aria-hidden="true"></div>
+          <div class="notification-crop-placeholder" id="notification-crop-placeholder">Sélectionne une image pour commencer le cadrage.</div>
+         </div>
+         <div class="field"><label for="notification-crop-zoom">Zoom / Réduction <output id="notification-crop-zoom-label">100 %</output></label><input type="range" id="notification-crop-zoom" min="50" max="300" value="100" step="1"/></div>
+         <div class="notification-crop-actions"><button type="button" class="btn outline small" id="notification-crop-reset">Réinitialiser le cadrage</button><button type="button" class="btn small" id="notification-crop-apply" disabled>Appliquer et importer l'image</button></div>
+         <p id="notification-crop-status" class="muted" role="status"></p>
+        </div>
         <label><input type="checkbox" id="notification-active" checked/> Afficher cette notification aux visiteurs</label>
         <p><button class="btn" type="submit">Enregistrer la notification</button> <button class="btn outline" id="notification-reset" type="button">Nouveau</button></p>
        </form>

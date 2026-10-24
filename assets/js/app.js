@@ -248,11 +248,95 @@ async function loadAdminNotifications(){
 function updateNotificationPreview(){
  $("#notification-preview").innerHTML=notificationMarkup({title:$("#notification-title").value,description:$("#notification-description").value,image_url:$("#notification-image").value},true);
 }
+// Recadrage des images de notification : le rendu est exporté dans R2 avant sauvegarde.
+let notificationCropImage=null;
+let notificationCropX=0,notificationCropY=0,notificationCropZoom=1;
+let notificationCropDrag=null;
+let notificationCropSource="";
+function drawNotificationCrop(){
+ const canvas=$("#notification-crop-canvas");if(!canvas)return;
+ const ctx=canvas.getContext("2d");ctx.clearRect(0,0,canvas.width,canvas.height);
+ if(!notificationCropImage)return;
+ const im=notificationCropImage;
+ const base=Math.max(canvas.width/im.naturalWidth,canvas.height/im.naturalHeight);
+ const scale=base*notificationCropZoom;
+ const w=im.naturalWidth*scale,h=im.naturalHeight*scale;
+ ctx.drawImage(im,(canvas.width-w)/2+notificationCropX,(canvas.height-h)/2+notificationCropY,w,h);
+}
+function notificationCropBounds(){
+ if(!notificationCropImage)return;
+ const canvas=$("#notification-crop-canvas"),im=notificationCropImage;
+ const scale=Math.max(canvas.width/im.naturalWidth,canvas.height/im.naturalHeight)*notificationCropZoom;
+ const limitX=Math.max(0,(im.naturalWidth*scale-canvas.width)/2);
+ const limitY=Math.max(0,(im.naturalHeight*scale-canvas.height)/2);
+ notificationCropX=Math.max(-limitX,Math.min(limitX,notificationCropX));
+ notificationCropY=Math.max(-limitY,Math.min(limitY,notificationCropY));
+}
+function notificationCropReset(){
+ notificationCropX=0;notificationCropY=0;notificationCropZoom=1;
+ $("#notification-crop-zoom").value=100;
+ $("#notification-crop-zoom-label").textContent="100 %";
+ drawNotificationCrop();
+}
+function loadNotificationCrop(src){
+ if(!src)return;
+ const im=new Image();
+ im.crossOrigin="anonymous";
+ $("#notification-crop-status").textContent="Chargement de l'image…";
+ im.onload=()=>{notificationCropImage=im;notificationCropReset();$("#notification-crop-placeholder").hidden=true;$("#notification-crop-apply").disabled=false;$("#notification-crop-status").textContent="Déplace et zoome, puis clique sur Appliquer et importer.";};
+ im.onerror=()=>{$("#notification-crop-status").textContent="Image impossible à charger pour le rognage. Pour une URL externe, télécharge l'image puis sélectionne son fichier.";};
+ im.src=src;
+}
+function initNotificationCrop(){
+ const fileInput=$("#notification-image-file"),stage=$("#notification-crop-stage"),zoom=$("#notification-crop-zoom");
+ if(!fileInput||!stage)return;
+ const dropZone=$("notification-upload-zone"),fileName=$("notification-upload-file");
+ const acceptNotificationFile=file=>{
+  if(!file)return;
+  if(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>5*1024*1024){$("notification-crop-status").textContent="Choisis une image JPEG, PNG ou WebP de 5 Mo maximum.";return;}
+  if(notificationCropSource.startsWith("blob:"))URL.revokeObjectURL(notificationCropSource);
+  notificationCropSource=URL.createObjectURL(file);
+  fileName.textContent="✓ "+(file.name||"Image collée");fileName.hidden=false;
+  loadNotificationCrop(notificationCropSource);
+ };
+ fileInput.addEventListener("change",()=>acceptNotificationFile(fileInput.files?.[0]));
+ dropZone.addEventListener("click",()=>fileInput.click());
+ dropZone.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fileInput.click();}});
+ ["dragenter","dragover"].forEach(type=>dropZone.addEventListener(type,e=>{e.preventDefault();dropZone.classList.add("drag-over");}));
+ ["dragleave","drop"].forEach(type=>dropZone.addEventListener(type,e=>{e.preventDefault();dropZone.classList.remove("drag-over");}));
+ dropZone.addEventListener("drop",e=>acceptNotificationFile([...e.dataTransfer.files].find(f=>f.type.startsWith("image/"))));
+ document.addEventListener("paste",e=>{
+  if(!$("notification-crop-editor")||$("notification-crop-editor").closest("[data-pane]")?.classList.contains("hidden"))return;
+  const file=[...(e.clipboardData?.files||[])].find(f=>f.type.startsWith("image/"));
+  if(file){e.preventDefault();acceptNotificationFile(file);}
+ });
+ zoom.addEventListener("input",()=>{notificationCropZoom=Number(zoom.value)/100;$("#notification-crop-zoom-label").textContent=zoom.value+" %";notificationCropBounds();drawNotificationCrop();});
+ stage.addEventListener("pointerdown",e=>{if(!notificationCropImage||(e.pointerType==="mouse"&&e.button!==0))return;notificationCropDrag={id:e.pointerId,x:e.clientX,y:e.clientY,startX:notificationCropX,startY:notificationCropY};stage.setPointerCapture(e.pointerId);stage.classList.add("dragging");});
+ stage.addEventListener("pointermove",e=>{if(!notificationCropDrag||e.pointerId!==notificationCropDrag.id)return;const r=stage.getBoundingClientRect();notificationCropX=notificationCropDrag.startX+(e.clientX-notificationCropDrag.x)*960/r.width;notificationCropY=notificationCropDrag.startY+(e.clientY-notificationCropDrag.y)*540/r.height;notificationCropBounds();drawNotificationCrop();});
+ const end=e=>{if(notificationCropDrag&&e.pointerId===notificationCropDrag.id){notificationCropDrag=null;stage.classList.remove("dragging");}};
+ stage.addEventListener("pointerup",end);stage.addEventListener("pointercancel",end);
+ $("#notification-crop-reset").addEventListener("click",notificationCropReset);
+ $("#notification-crop-apply").addEventListener("click",async()=>{
+  if(!notificationCropImage)return;
+  const status=$("#notification-crop-status"),button=$("#notification-crop-apply");button.disabled=true;
+  try{
+   drawNotificationCrop();status.textContent="Préparation de l'image…";
+   const blob=await new Promise((resolve,reject)=>$("#notification-crop-canvas").toBlob(b=>b?resolve(b):reject(Error("Impossible d'exporter cette image (restrictions CORS). Utilise un fichier local.")),"image/webp",.88));
+   status.textContent="Importation de l'image recadrée…";
+   const headers={"Content-Type":"image/webp"};if(token())headers.Authorization="Bearer "+token();
+   const response=await fetch(API+"/api/admin/upload-vehicle-image",{method:"POST",headers,body:blob});
+   const result=await response.json().catch(()=>({}));if(!response.ok)throw Error(result.error||"Échec de l'importation");
+   $("#notification-image").value=result.url;
+   updateNotificationPreview();status.textContent="Image recadrée et importée ! Enregistre maintenant la notification.";
+  }catch(err){status.textContent=err.message;}finally{button.disabled=false;}
+ });
+}
 function resetNotificationForm(){
  $("#notification-form").reset();$("#notification-id").value="";$("#notification-active").checked=true;
- $("#notification-form-title").textContent="Créer une notification";updateNotificationPreview();
+ $("#notification-form-title").textContent="Créer une notification";notificationCropImage=null;$("#notification-crop-placeholder").hidden=false;$("#notification-crop-apply").disabled=true;$("#notification-crop-status").textContent="";updateNotificationPreview();
 }
 async function adminPage(){
+ initNotificationCrop();
  $("#admin-vehicle-price-sort")?.addEventListener("change",adminRows);
  $("#login-form").onsubmit=async e=>{e.preventDefault();try{
   const result=await api("/api/admin/login",{method:"POST",body:{code:$("#admin-code").value}});
@@ -261,7 +345,7 @@ async function adminPage(){
  }catch(err){notice(err.message,true);}};
  $("#logout").onclick=async()=>{try{await api("/api/admin/logout",{method:"POST",auth:true});}catch{}sessionStorage.removeItem("hr_admin_token");setLogged(false);notice("Déconnecté.");};
  if(token()){try{await api("/api/admin/me",{auth:true});await refreshAdmin();await loadAdminNotifications();refreshAppearanceForm();setLogged(true);}catch{sessionStorage.removeItem("hr_admin_token");setLogged(false);}}
- ["notification-title","notification-description","notification-image"].forEach(id=>$("#"+id).addEventListener("input",updateNotificationPreview));
+ ["notification-title","notification-description"].forEach(id=>$("#"+id).addEventListener("input",updateNotificationPreview));
  $("#notification-reset").onclick=resetNotificationForm;
  $("#notification-form").onsubmit=async e=>{
   e.preventDefault();const id=$("#notification-id").value;
@@ -272,7 +356,7 @@ async function adminPage(){
   const b=e.target.closest("button");if(!b)return;
   const edit=b.dataset.editNotification,del=b.dataset.deleteNotification;
   if(edit){const n=adminNotifications.find(x=>x.id===Number(edit));if(!n)return;
-   $("#notification-id").value=n.id;$("#notification-title").value=n.title;$("#notification-description").value=n.description;$("#notification-image").value=n.image_url||"";$("#notification-active").checked=!!n.active;$("#notification-form-title").textContent="Modifier la notification";updateNotificationPreview();$("#notification-form").scrollIntoView({behavior:"smooth"});
+   $("#notification-id").value=n.id;$("#notification-title").value=n.title;$("#notification-description").value=n.description;$("#notification-image").value=n.image_url||"";$("#notification-active").checked=!!n.active;$("#notification-form-title").textContent="Modifier la notification";notificationCropImage=null;$("#notification-crop-placeholder").hidden=false;$("#notification-crop-apply").disabled=true;$("#notification-crop-status").textContent="Pour changer cette image, glisse une nouvelle photo ou colle une capture (Ctrl + V).";updateNotificationPreview();$("#notification-form").scrollIntoView({behavior:"smooth"});
   }
   if(del&&confirm("Supprimer cette notification ?")){try{await api("/api/admin/notifications/"+del,{method:"DELETE",auth:true});await loadAdminNotifications();notice("Notification supprimée.");}catch(err){notice(err.message,true);}}
  };
